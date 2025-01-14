@@ -6,8 +6,8 @@ import { fetchImages } from '../api/fetchImages';
 import ImageModal from './ImageModal/ImageModal';
 import Loader from './Loader/Loader';
 import LoadMoreBtn from './LoadMoreBtn/LoadMoreBtn';
-import ErrorMessage from './ErrorMassage/ErrorMassage';
-import { Toaster } from 'react-hot-toast';
+import ErrorMessage from './ErrorMessage/ErrorMessage';
+import { Toaster, toast } from 'react-hot-toast';
 
 const App = () => {
   const [images, setImages] = useState([]);
@@ -25,50 +25,45 @@ const App = () => {
     await loadImages(searchQuery, 1);
   };
 
-  const loadImages = async (searchQuery, currentPage) => {
+  const loadImages = async (searchQuery, page) => {
     setLoading(true);
     setError(null);
-
     try {
-      const results = await fetchImages(searchQuery, currentPage);
-      setImages(prevImages => [...prevImages, ...results]);
-    } catch (err) {
-      setError(err.message);
-      ErrorMessage('Failed to load images!');
+      const newImages = await fetchImages(searchQuery, page);
+      setImages(prevImages => [...prevImages, ...newImages]);
+    } catch (error) {
+      setError('Failed to load images!');
+      toast.error('Failed to load images!');
     } finally {
       setLoading(false);
     }
   };
 
-  const handleLoadMore = () => {
-    const nextPage = page + 1;
-    setPage(nextPage);
-    loadImages(query, nextPage);
-  };
-
   const openModal = id => {
     const image = images.find(img => img.id === id);
-    if (image) {
-      setSelectedImage(image);
-      setIsModalOpen(true);
-    }
+    setSelectedImage(image);
+    setIsModalOpen(true);
   };
 
   const closeModal = () => {
-    setSelectedImage(null);
     setIsModalOpen(false);
+    setSelectedImage(null);
   };
 
   return (
-    <div className="app">
+    <div>
       <SearchBar onSubmit={handleSearch} />
-      {error && ErrorMessage(error)}
-      {loading && query && !images.length && <Loader />}
-      <ImageGallery images={images} openModal={openModal} />
-      {!loading && images.length > 0 && (
-        <LoadMoreBtn onClick={handleLoadMore} />
+      {error ? (
+        <ErrorMessage message={error} />
+      ) : (
+        <>
+          <ImageGallery images={images} openModal={openModal} />
+          {loading && <Loader />}
+          {images.length > 0 && !loading && (
+            <LoadMoreBtn onClick={() => loadImages(query, page + 1)} />
+          )}
+        </>
       )}
-      {loading && images.length > 0 && <Loader />}
       {isModalOpen && (
         <ImageModal
           image={selectedImage}
@@ -76,7 +71,7 @@ const App = () => {
           onClose={closeModal}
         />
       )}
-      <Toaster position="bottom-center" />
+      <Toaster />
     </div>
   );
 };

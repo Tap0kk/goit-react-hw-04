@@ -1,6 +1,6 @@
 import { useState } from 'react';
 import { GoSearch } from 'react-icons/go';
-import ErrorMessage from '../ErrorMassage/ErrorMassage';
+import ErrorMessage from '../ErrorMessage/ErrorMessage';
 import s from './SearchBar.module.css';
 
 const SearchBar = ({ onSubmit }) => {
@@ -9,10 +9,10 @@ const SearchBar = ({ onSubmit }) => {
     setSearchQuery(e.target.value);
   };
 
+  const trimmedQuery = searchQuery.trim();
+
   const handleSubmit = e => {
     e.preventDefault();
-    const trimmedQuery = searchQuery.trim();
-
     if (trimmedQuery === '') {
       ErrorMessage('Please enter a search term!');
       return;
@@ -22,14 +22,13 @@ const SearchBar = ({ onSubmit }) => {
     setSearchQuery('');
   };
 
-  const handleIconClick = () => {
-    const trimmedQuery = searchQuery.trim();
-
-    if (trimmedQuery) {
-      handleSubmit();
-    } else {
+  const handleBtnClick = () => {
+    if (trimmedQuery === '') {
       ErrorMessage('Please enter a search term!');
+      return;
     }
+    onSubmit(trimmedQuery);
+    setSearchQuery('');
   };
 
   return (
@@ -40,7 +39,7 @@ const SearchBar = ({ onSubmit }) => {
             <GoSearch
               className={s.searchIcon}
               size={16}
-              onClick={handleIconClick}
+              onClick={handleBtnClick}
             />
           </button>
           <input
