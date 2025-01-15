@@ -2,6 +2,7 @@ import { useState } from 'react';
 import { GoSearch } from 'react-icons/go';
 import ErrorMessage from '../ErrorMessage/ErrorMessage';
 import s from './SearchBar.module.css';
+import { toast } from 'react-hot-toast';
 
 const SearchBar = ({ onSubmit }) => {
   const [searchQuery, setSearchQuery] = useState('');
@@ -14,7 +15,7 @@ const SearchBar = ({ onSubmit }) => {
   const handleSubmit = e => {
     e.preventDefault();
     if (trimmedQuery === '') {
-      ErrorMessage('Please enter a search term!');
+      toast.error('Please enter a search term!');
       return;
     }
 
